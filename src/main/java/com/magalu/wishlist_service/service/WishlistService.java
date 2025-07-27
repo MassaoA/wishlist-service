@@ -1,5 +1,7 @@
 package com.magalu.wishlist_service.service;
 
+import com.magalu.wishlist_service.exception.WishlistLimitExceededException;
+import com.magalu.wishlist_service.exception.WishlistNotFoundException;
 import com.magalu.wishlist_service.model.Product;
 import com.magalu.wishlist_service.model.Wishlist;
 import com.magalu.wishlist_service.repository.WishlistRepository;
@@ -8,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class WishlistService {
@@ -19,19 +20,23 @@ public class WishlistService {
     private WishlistRepository wishlistRepository;
 
     public Wishlist addProduct(String customerId, Product product) {
-        Wishlist wishlist = wishlistRepository.findById(customerId).orElse(new Wishlist(customerId, new ArrayList<>()));
+        Wishlist wishlist = wishlistRepository.findById(customerId)
+                .orElse(new Wishlist(customerId, new ArrayList<>()));
 
         if (wishlist.getProducts().size() >= MAX_PRODUCTS) {
-            throw new IllegalStateException("Wishlist atingiu o limite de 20 produtos.");
+            throw new WishlistLimitExceededException();
         }
 
-        if (wishlist.getProducts().stream().noneMatch(p -> p.getId().equals(product.getId()))) {
+        boolean alreadyInWishlist = wishlist.getProducts()
+                .stream()
+                .anyMatch(p -> p.getId().equals(product.getId()));
+
+        if (!alreadyInWishlist) {
             wishlist.getProducts().add(product);
             return wishlistRepository.save(wishlist);
         }
 
         return wishlist;
-
     }
 
     public Wishlist removeProduct(String customerId, String productId) {
@@ -52,6 +57,6 @@ public class WishlistService {
 
     private Wishlist getWishlistOrThrow(String customerId) {
         return wishlistRepository.findById(customerId)
-                .orElseThrow(() -> new NoSuchElementException("Wishlist não encontrada para o cliente: " + customerId));
+                .orElseThrow(() -> new WishlistNotFoundException("Wishlist não encontrada para o cliente: " + customerId));
     }
 }
