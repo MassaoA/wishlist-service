@@ -5,12 +5,14 @@ import com.magalu.wishlist_service.exception.WishlistNotFoundException;
 import com.magalu.wishlist_service.model.Product;
 import com.magalu.wishlist_service.model.Wishlist;
 import com.magalu.wishlist_service.repository.WishlistRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class WishlistService {
 
@@ -20,8 +22,10 @@ public class WishlistService {
     private WishlistRepository wishlistRepository;
 
     public Wishlist addProduct(String customerId, Product product) {
+        log.info("Adicionando produto na Wishlist {}", product.getName());
         Wishlist wishlist = wishlistRepository.findById(customerId)
                 .orElse(new Wishlist(customerId, new ArrayList<>()));
+        Wishlist wishlist = wishlistRepository.findById(customerId).orElse(new Wishlist(customerId, new ArrayList<>()));
 
         if (wishlist.getProducts().size() >= MAX_PRODUCTS) {
             throw new WishlistLimitExceededException();
@@ -37,6 +41,7 @@ public class WishlistService {
         }
 
         return wishlist;
+
     }
 
     public Wishlist removeProduct(String customerId, String productId) {

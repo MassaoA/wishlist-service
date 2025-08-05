@@ -7,8 +7,10 @@ import com.magalu.wishlist_service.model.Product;
 import com.magalu.wishlist_service.model.Wishlist;
 import com.magalu.wishlist_service.service.WishlistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class WishlistController {
 
     @Autowired
     private WishlistService wishlistService;
+
     @PostMapping("/{customerId}")
     public ResponseEntity<WishlistResponseDTO> addProduct(@PathVariable String customerId, @RequestBody ProductDTO productDTO) {
         Product product = wishlistMapper.toEntity(productDTO);
